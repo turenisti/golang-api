@@ -4,7 +4,7 @@ variables:
   SERVICE_NAME: scheduling-report-api
   REPO: asia-southeast2-docker.pkg.dev/finnet-artifact-cde/finnet-cde-repo
   NAMESPACE: finpay-cde
-  SONAR_PROJECT_KEY: finpay-billing_scheduling-report-api_XXXXXXXXXXXX
+  SONAR_PROJECT_KEY: Scheduling-Report-API
 
 stages:
   - static-analysis
