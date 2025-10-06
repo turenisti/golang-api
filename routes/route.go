@@ -37,6 +37,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// Schedules endpoints (Phase 3)
 	api.Get("/schedules", scheduleCtrl.GetSchedules)
+	api.Get("/schedules/details", scheduleCtrl.GetSchedulesWithDetails) // Schedule details with full config and deliveries - MUST be before :id
 	api.Get("/schedules/:id", scheduleCtrl.GetScheduleByID)
 	api.Get("/schedules/config/:config_id", scheduleCtrl.GetSchedulesByConfigID)
 	api.Post("/schedules", scheduleCtrl.CreateSchedule)

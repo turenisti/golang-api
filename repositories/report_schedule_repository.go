@@ -72,3 +72,115 @@ func (r *ReportScheduleRepository) CheckConfigExists(configID int) (bool, error)
 		Count(&count).Error
 	return count > 0, err
 }
+
+// GetSchedulesWithDetails retrieves schedules with full config and delivery details
+func (r *ReportScheduleRepository) GetSchedulesWithDetails(filters models.ScheduleDetailFilters) ([]models.ScheduleDetail, error) {
+	var schedules []models.ReportSchedule
+	query := r.DB.Model(&models.ReportSchedule{})
+
+	// Schedule filters
+	if filters.IsActive != nil {
+		query = query.Where("report_schedules.is_active = ?", *filters.IsActive)
+	}
+	if filters.Timezone != "" {
+		query = query.Where("report_schedules.timezone = ?", filters.Timezone)
+	}
+	if filters.ConfigID != nil {
+		query = query.Where("report_schedules.config_id = ?", *filters.ConfigID)
+	}
+	if filters.CreatedBy != "" {
+		query = query.Where("report_schedules.created_by = ?", filters.CreatedBy)
+	}
+	if filters.HasRun != nil {
+		if *filters.HasRun {
+			query = query.Where("report_schedules.last_run_at IS NOT NULL")
+		} else {
+			query = query.Where("report_schedules.last_run_at IS NULL")
+		}
+	}
+
+	// Execute query to get schedules
+	err := query.Order("report_schedules.created_at DESC").Find(&schedules).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Build detailed response
+	var details []models.ScheduleDetail
+	for _, schedule := range schedules {
+		// Get config
+		var config models.ReportConfig
+		configQuery := r.DB.Where("id = ?", schedule.ConfigID)
+		
+		// Apply config filters
+		if filters.ConfigIsActive != nil {
+			configQuery = configQuery.Where("is_active = ?", *filters.ConfigIsActive)
+		}
+		if filters.DatasourceID != nil {
+			configQuery = configQuery.Where("datasource_id = ?", *filters.DatasourceID)
+		}
+		if filters.OutputFormat != "" {
+			configQuery = configQuery.Where("output_format = ?", filters.OutputFormat)
+		}
+		if filters.ConfigName != "" {
+			configQuery = configQuery.Where("report_name LIKE ?", "%"+filters.ConfigName+"%")
+		}
+
+		err := configQuery.First(&config).Error
+		if err != nil {
+			// Skip schedules where config doesn't match filters
+			continue
+		}
+
+		// Get deliveries
+		var deliveries []models.ReportDelivery
+		deliveryQuery := r.DB.Where("config_id = ?", config.ID)
+		
+		// Apply delivery filters
+		if filters.DeliveryIsActive != nil {
+			deliveryQuery = deliveryQuery.Where("is_active = ?", *filters.DeliveryIsActive)
+		}
+		if filters.DeliveryMethod != "" {
+			deliveryQuery = deliveryQuery.Where("method = ?", filters.DeliveryMethod)
+		}
+
+		deliveryQuery.Find(&deliveries)
+
+		// Build config with deliveries
+		configWithDeliveries := models.ConfigWithDeliveries{
+			ID:             config.ID,
+			ReportName:     config.ReportName,
+			ReportQuery:    config.ReportQuery,
+			OutputFormat:   config.OutputFormat,
+			DatasourceID:   config.DatasourceID,
+			Parameters:     config.Parameters,
+			TimeoutSeconds: config.TimeoutSeconds,
+			MaxRows:        config.MaxRows,
+			IsActive:       config.IsActive,
+			CreatedAt:      config.CreatedAt,
+			UpdatedAt:      config.UpdatedAt,
+			CreatedBy:      config.CreatedBy,
+			UpdatedBy:      config.UpdatedBy,
+			Version:        config.Version,
+			Deliveries:     deliveries,
+		}
+
+		// Build schedule detail
+		detail := models.ScheduleDetail{
+			ID:             schedule.ID,
+			Config:         &configWithDeliveries,
+			CronExpression: schedule.CronExpression,
+			Timezone:       schedule.Timezone,
+			IsActive:       schedule.IsActive,
+			LastRunAt:      schedule.LastRunAt,
+			CreatedAt:      schedule.CreatedAt,
+			UpdatedAt:      schedule.UpdatedAt,
+			CreatedBy:      schedule.CreatedBy,
+			UpdatedBy:      schedule.UpdatedBy,
+		}
+
+		details = append(details, detail)
+	}
+
+	return details, nil
+}

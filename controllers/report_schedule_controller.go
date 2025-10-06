@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"scheduling-report/models"
 	"scheduling-report/services"
 	"scheduling-report/utils"
 	"strconv"
@@ -175,4 +176,18 @@ func (ctrl *ReportScheduleController) DeleteSchedule(c *fiber.Ctx) error {
 	}
 
 	return utils.SuccessResponse(c, nil, "Schedule deleted successfully")
+}
+
+// GetSchedulesWithDetails retrieves schedules with full config and delivery details
+func (ctrl *ReportScheduleController) GetSchedulesWithDetails(c *fiber.Ctx) error {
+	var filters models.ScheduleDetailFilters
+	
+	// Parse query parameters
+	if err := c.QueryParser(&filters); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, 1, "Invalid query parameters")
+	}
+
+	details, _, responseMessage := ctrl.service.GetSchedulesWithDetails(filters)
+
+	return utils.SuccessResponse(c, details, responseMessage)
 }

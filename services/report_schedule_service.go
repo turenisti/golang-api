@@ -183,3 +183,17 @@ func (s *ReportScheduleService) Delete(id int, deletedBy string, sessionID *stri
 
 	return nil
 }
+
+// GetSchedulesWithDetails retrieves schedules with full config and delivery details
+func (s *ReportScheduleService) GetSchedulesWithDetails(filters models.ScheduleDetailFilters) ([]models.ScheduleDetail, string, string) {
+	details, err := s.repo.GetSchedulesWithDetails(filters)
+	if err != nil {
+		return nil, "50003100", "Failed to retrieve schedule details"
+	}
+
+	if len(details) == 0 {
+		return []models.ScheduleDetail{}, "20003100", "No schedules found matching the filters"
+	}
+
+	return details, "20003100", "Schedule details retrieved successfully"
+}
