@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"time"
 )
 
 // Parameters stores report parameters as JSON
@@ -41,8 +40,8 @@ type ReportConfig struct {
 	TimeoutSeconds int        `gorm:"default:300;column:timeout_seconds" json:"timeout_seconds"`
 	MaxRows        int        `gorm:"default:10000;column:max_rows" json:"max_rows"`
 	IsActive       bool       `gorm:"not null;default:1;index;column:is_active" json:"is_active"`
-	CreatedAt      time.Time  `gorm:"default:CURRENT_TIMESTAMP;index;column:created_at" json:"created_at"`
-	UpdatedAt      time.Time  `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
+	CreatedAt        CustomTime  `gorm:"default:CURRENT_TIMESTAMP;index;column:created_at" json:"created_at"`
+	UpdatedAt        CustomTime  `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
 	CreatedBy      string     `gorm:"size:100;not null;column:created_by" json:"created_by"`
 	UpdatedBy      string     `gorm:"size:100;not null;column:updated_by" json:"updated_by"`
 	Version        int        `gorm:"not null;default:1;column:version" json:"version"`

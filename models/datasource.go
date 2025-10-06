@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"time"
 )
 
 // ConnectionConfig stores additional connection parameters as JSON
@@ -38,8 +37,8 @@ type DataSource struct {
 	DbType           string           `gorm:"type:enum('mysql','postgresql','oracle','sqlserver','mongodb','bigquery','snowflake');not null;index;column:db_type" json:"db_type"`
 	ConnectionConfig ConnectionConfig `gorm:"type:json;column:connection_config" json:"connection_config"`
 	IsActive         bool             `gorm:"not null;default:1;index;column:is_active" json:"is_active"`
-	CreatedAt        time.Time        `gorm:"default:CURRENT_TIMESTAMP;column:created_at" json:"created_at"`
-	UpdatedAt        time.Time        `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
+	CreatedAt        CustomTime        `gorm:"default:CURRENT_TIMESTAMP;column:created_at" json:"created_at"`
+	UpdatedAt        CustomTime        `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
 	CreatedBy        string           `gorm:"size:100;not null;column:created_by" json:"created_by"`
 	UpdatedBy        string           `gorm:"size:100;not null;column:updated_by" json:"updated_by"`
 }

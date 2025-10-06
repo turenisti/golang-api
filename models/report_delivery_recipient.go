@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"time"
 )
 
 type RecipientConfig map[string]interface{}
@@ -31,8 +30,8 @@ type ReportDeliveryRecipient struct {
 	RecipientValue  string          `gorm:"size:500;not null;column:recipient_value" json:"recipient_value"`
 	RecipientConfig RecipientConfig `gorm:"type:json;column:recipient_config" json:"recipient_config"`
 	IsActive        bool            `gorm:"not null;default:1;column:is_active" json:"is_active"`
-	CreatedAt       time.Time       `gorm:"default:CURRENT_TIMESTAMP;column:created_at" json:"created_at"`
-	UpdatedAt       time.Time       `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
+	CreatedAt        CustomTime       `gorm:"default:CURRENT_TIMESTAMP;column:created_at" json:"created_at"`
+	UpdatedAt        CustomTime       `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
 }
 
 func (ReportDeliveryRecipient) TableName() string {

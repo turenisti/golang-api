@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"time"
 )
 
 type DeliveryConfig map[string]interface{}
@@ -33,8 +32,8 @@ type ReportDelivery struct {
 	MaxRetry             int            `gorm:"not null;default:3;column:max_retry" json:"max_retry"`
 	RetryIntervalMinutes int            `gorm:"not null;default:5;column:retry_interval_minutes" json:"retry_interval_minutes"`
 	IsActive             bool           `gorm:"not null;default:1;index;column:is_active" json:"is_active"`
-	CreatedAt            time.Time      `gorm:"default:CURRENT_TIMESTAMP;column:created_at" json:"created_at"`
-	UpdatedAt            time.Time      `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
+	CreatedAt        CustomTime      `gorm:"default:CURRENT_TIMESTAMP;column:created_at" json:"created_at"`
+	UpdatedAt        CustomTime      `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
 	CreatedBy            string         `gorm:"size:100;not null;column:created_by" json:"created_by"`
 	UpdatedBy            string         `gorm:"size:100;not null;column:updated_by" json:"updated_by"`
 }
