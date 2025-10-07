@@ -16,21 +16,38 @@ type ScheduleDetail struct {
 
 // ConfigWithDeliveries represents a report config with its deliveries
 type ConfigWithDeliveries struct {
-	ID             int              `json:"id"`
-	ReportName     string           `json:"report_name"`
-	ReportQuery    string           `json:"report_query"`
-	OutputFormat   string           `json:"output_format"`
-	DatasourceID   int              `json:"datasource_id"`
-	Parameters     Parameters       `json:"parameters"`
-	TimeoutSeconds int              `json:"timeout_seconds"`
-	MaxRows        int              `json:"max_rows"`
-	IsActive       bool             `json:"is_active"`
-	CreatedAt      CustomTime       `json:"created_at"`
-	UpdatedAt      CustomTime       `json:"updated_at"`
-	CreatedBy      string           `json:"created_by"`
-	UpdatedBy      string           `json:"updated_by"`
-	Version        int              `json:"version"`
-	Deliveries     []ReportDelivery `json:"deliveries"`
+	ID             int                      `json:"id"`
+	ReportName     string                   `json:"report_name"`
+	ReportQuery    string                   `json:"report_query"`
+	OutputFormat   string                   `json:"output_format"`
+	DatasourceID   int                      `json:"datasource_id"`
+	Parameters     Parameters               `json:"parameters"`
+	TimeoutSeconds int                      `json:"timeout_seconds"`
+	MaxRows        int                      `json:"max_rows"`
+	IsActive       bool                     `json:"is_active"`
+	CreatedAt      CustomTime               `json:"created_at"`
+	UpdatedAt      CustomTime               `json:"updated_at"`
+	CreatedBy      string                   `json:"created_by"`
+	UpdatedBy      string                   `json:"updated_by"`
+	Version        int                      `json:"version"`
+	Deliveries     []DeliveryWithRecipients `json:"deliveries"`
+}
+
+// DeliveryWithRecipients represents a delivery with its recipients
+type DeliveryWithRecipients struct {
+	ID                   int                       `json:"id"`
+	ConfigID             int                       `json:"config_id"`
+	DeliveryName         string                    `json:"delivery_name"`
+	Method               string                    `json:"method"`
+	DeliveryConfig       DeliveryConfig            `json:"delivery_config"`
+	MaxRetry             int                       `json:"max_retry"`
+	Recipients           []ReportDeliveryRecipient `json:"recipients"`
+	RetryIntervalMinutes int                       `json:"retry_interval_minutes"`
+	IsActive             bool                      `json:"is_active"`
+	CreatedAt            CustomTime                `json:"created_at"`
+	UpdatedAt            CustomTime                `json:"updated_at"`
+	CreatedBy            string                    `json:"created_by"`
+	UpdatedBy            string                    `json:"updated_by"`
 }
 
 // ScheduleDetailFilters represents query filters for schedules/details endpoint

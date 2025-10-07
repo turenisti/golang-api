@@ -135,7 +135,7 @@ func (r *ReportScheduleRepository) GetSchedulesWithDetails(filters models.Schedu
 		// Get deliveries
 		var deliveries []models.ReportDelivery
 		deliveryQuery := r.DB.Where("config_id = ?", config.ID)
-		
+
 		// Apply delivery filters
 		if filters.DeliveryIsActive != nil {
 			deliveryQuery = deliveryQuery.Where("is_active = ?", *filters.DeliveryIsActive)
@@ -145,6 +145,33 @@ func (r *ReportScheduleRepository) GetSchedulesWithDetails(filters models.Schedu
 		}
 
 		deliveryQuery.Find(&deliveries)
+
+		// Build deliveries with recipients
+		var deliveriesWithRecipients []models.DeliveryWithRecipients
+		for _, delivery := range deliveries {
+			// Get recipients for this delivery
+			var recipients []models.ReportDeliveryRecipient
+			r.DB.Where("delivery_id = ? AND is_active = ?", delivery.ID, true).Find(&recipients)
+
+			// Build delivery with recipients
+			deliveryWithRecipients := models.DeliveryWithRecipients{
+				ID:                   delivery.ID,
+				ConfigID:             delivery.ConfigID,
+				DeliveryName:         delivery.DeliveryName,
+				Method:               delivery.Method,
+				DeliveryConfig:       delivery.DeliveryConfig,
+				MaxRetry:             delivery.MaxRetry,
+				Recipients:           recipients,
+				RetryIntervalMinutes: delivery.RetryIntervalMinutes,
+				IsActive:             delivery.IsActive,
+				CreatedAt:            delivery.CreatedAt,
+				UpdatedAt:            delivery.UpdatedAt,
+				CreatedBy:            delivery.CreatedBy,
+				UpdatedBy:            delivery.UpdatedBy,
+			}
+
+			deliveriesWithRecipients = append(deliveriesWithRecipients, deliveryWithRecipients)
+		}
 
 		// Build config with deliveries
 		configWithDeliveries := models.ConfigWithDeliveries{
@@ -162,7 +189,7 @@ func (r *ReportScheduleRepository) GetSchedulesWithDetails(filters models.Schedu
 			CreatedBy:      config.CreatedBy,
 			UpdatedBy:      config.UpdatedBy,
 			Version:        config.Version,
-			Deliveries:     deliveries,
+			Deliveries:     deliveriesWithRecipients,
 		}
 
 		// Build schedule detail
