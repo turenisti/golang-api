@@ -12,6 +12,7 @@ func SetupRoutes(app *fiber.App) {
 	datasourceCtrl := controllers.NewDatasourceController()
 	reportConfigCtrl := controllers.NewReportConfigController()
 	scheduleCtrl := controllers.NewReportScheduleController()
+	previewCtrl := controllers.NewSchedulePreviewController()
 	deliveryCtrl := controllers.NewReportDeliveryController()
 	recipientCtrl := controllers.NewReportDeliveryRecipientController()
 	executionCtrl := controllers.NewReportExecutionController()
@@ -38,6 +39,8 @@ func SetupRoutes(app *fiber.App) {
 	// Schedules endpoints (Phase 3)
 	api.Get("/schedules", scheduleCtrl.GetSchedules)
 	api.Get("/schedules/details", scheduleCtrl.GetSchedulesWithDetails) // Schedule details with full config and deliveries - MUST be before :id
+	api.Post("/schedules/validate-cron", scheduleCtrl.ValidateCronExpression) // Validate cron before creating schedule
+	api.Post("/schedules/preview", previewCtrl.PreviewScheduleExecution) // Preview schedule execution with query examples
 	api.Get("/schedules/:id", scheduleCtrl.GetScheduleByID)
 	api.Get("/schedules/config/:config_id", scheduleCtrl.GetSchedulesByConfigID)
 	api.Post("/schedules", scheduleCtrl.CreateSchedule)

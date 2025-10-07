@@ -91,6 +91,16 @@ func (ctrl *ReportScheduleController) CreateSchedule(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, fiber.StatusBadRequest, 40003102, err.Error())
 	}
 
+	// Validate cron expression
+	validation := utils.ValidateCronExpression(input.CronExpression)
+	if !validation.Valid {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"responseCode":    "40003103",
+			"responseMessage": "Invalid cron expression",
+			"errors":          validation.Errors,
+		})
+	}
+
 	schedule, err := ctrl.service.Create(input)
 	if err != nil {
 		if err.Error() == "invalid cron expression" {
@@ -106,6 +116,27 @@ func (ctrl *ReportScheduleController) CreateSchedule(c *fiber.Ctx) error {
 		"responseCode":    "20103100",
 		"responseMessage": "Schedule created successfully",
 		"data":            schedule,
+		"cron_info":       validation,
+	})
+}
+
+// ValidateCronExpression validates a cron expression before creating schedule
+func (ctrl *ReportScheduleController) ValidateCronExpression(c *fiber.Ctx) error {
+	type ValidateRequest struct {
+		CronExpression string `json:"cron_expression" validate:"required"`
+	}
+
+	var input ValidateRequest
+	if err := c.BodyParser(&input); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, 40003101, "Invalid request body")
+	}
+
+	validation := utils.ValidateCronExpression(input.CronExpression)
+
+	return c.JSON(fiber.Map{
+		"responseCode":    "20003100",
+		"responseMessage": "Cron validation completed",
+		"data":            validation,
 	})
 }
 
