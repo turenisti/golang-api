@@ -12,6 +12,7 @@ import (
 	"scheduling-report/config"
 	"scheduling-report/middlewares"
 	"scheduling-report/routes"
+	"scheduling-report/services"
 )
 
 func main() {
@@ -23,6 +24,11 @@ func main() {
 
 	// Connect to database
 	config.ConnectDB()
+
+	// Initialize Kafka producer
+	if err := services.InitKafkaProducer(); err != nil {
+		log.Fatalf("Failed to initialize Kafka producer: %v", err)
+	}
 
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
@@ -55,6 +61,13 @@ func main() {
 
 	if err := app.Shutdown(); err != nil {
 		log.Fatalf("Error shutting down Fiber: %v", err)
+	}
+
+	// Close Kafka producer
+	if kafkaProducer := services.GetKafkaProducer(); kafkaProducer != nil {
+		if err := kafkaProducer.Close(); err != nil {
+			log.Printf("Error closing Kafka producer: %v", err)
+		}
 	}
 
 	log.Println("✅ Server exited gracefully")

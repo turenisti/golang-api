@@ -63,8 +63,9 @@ func SetupRoutes(app *fiber.App) {
 	api.Put("/recipients/:id", recipientCtrl.UpdateRecipient)
 	api.Delete("/recipients/:id", recipientCtrl.DeleteRecipient)
 
-	// Executions endpoints (Phase 5 - read-only)
+	// Executions endpoints (Phase 5 - read-only + async execution)
 	api.Get("/executions", executionCtrl.GetExecutions)
+	api.Get("/executions/execute-async", executionCtrl.ExecuteAsync) // NEW: Async execution via Kafka - MUST be before :id
 	api.Get("/executions/:id", executionCtrl.GetExecutionByID)
 	api.Get("/executions/config/:config_id", executionCtrl.GetExecutionsByConfigID)
 

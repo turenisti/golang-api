@@ -47,3 +47,7 @@ func (r *ReportExecutionRepository) GetByConfigID(configID int, limit int) ([]mo
 	err := query.Find(&executions).Error
 	return executions, err
 }
+
+func (r *ReportExecutionRepository) Create(execution *models.ReportExecution) error {
+	return r.DB.Create(execution).Error
+}
