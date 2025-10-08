@@ -36,12 +36,13 @@ type ReportConfig struct {
 	ReportQuery    string     `gorm:"type:text;not null;column:report_query" json:"report_query"`
 	OutputFormat   string     `gorm:"size:50;not null;default:'csv';column:output_format" json:"output_format"`
 	DatasourceID   int        `gorm:"not null;index;column:datasource_id" json:"datasource_id"`
+	FileName       *string    `gorm:"size:100;column:file_name" json:"file_name"`
 	Parameters     Parameters `gorm:"type:json;column:parameters" json:"parameters"`
 	TimeoutSeconds int        `gorm:"default:300;column:timeout_seconds" json:"timeout_seconds"`
 	MaxRows        int        `gorm:"default:10000;column:max_rows" json:"max_rows"`
 	IsActive       bool       `gorm:"not null;default:1;index;column:is_active" json:"is_active"`
-	CreatedAt        CustomTime  `gorm:"default:CURRENT_TIMESTAMP;index;column:created_at" json:"created_at"`
-	UpdatedAt        CustomTime  `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
+	CreatedAt      CustomTime `gorm:"default:CURRENT_TIMESTAMP;index;column:created_at" json:"created_at"`
+	UpdatedAt      CustomTime `gorm:"default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;column:updated_at" json:"updated_at"`
 	CreatedBy      string     `gorm:"size:100;not null;column:created_by" json:"created_by"`
 	UpdatedBy      string     `gorm:"size:100;not null;column:updated_by" json:"updated_by"`
 	Version        int        `gorm:"not null;default:1;column:version" json:"version"`
