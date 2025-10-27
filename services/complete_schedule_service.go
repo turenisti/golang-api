@@ -457,14 +457,10 @@ func (s *CompleteScheduleService) UpdateComplete(scheduleID int, req models.Comp
 						}
 					}
 
-					// Deactivate recipients not in request
-					if err := tx.Model(&models.ReportDeliveryRecipient{}).
-						Where("delivery_id = ? AND id NOT IN ?", deliveryModel.ID, getMapKeys(requestedRecipientIDs)).
-						Updates(map[string]interface{}{
-							"is_active":  false,
-							"updated_at": now,
-						}).Error; err != nil {
-						return fmt.Errorf("failed to deactivate removed recipients: %w", err)
+					// Hard delete recipients not in request
+					if err := tx.Where("delivery_id = ? AND id NOT IN ?", deliveryModel.ID, getMapKeys(requestedRecipientIDs)).
+						Delete(&models.ReportDeliveryRecipient{}).Error; err != nil {
+						return fmt.Errorf("failed to delete removed recipients: %w", err)
 					}
 
 					// Process each recipient
