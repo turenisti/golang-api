@@ -18,6 +18,24 @@ func NewCompleteScheduleService() *CompleteScheduleService {
 	return &CompleteScheduleService{}
 }
 
+// maskSensitiveFields masks sensitive fields in delivery_config for security
+func maskSensitiveFields(deliveryConfig models.DeliveryConfig, method string) models.DeliveryConfig {
+	// Only mask for methods that might have sensitive data
+	if method == "sftp" || method == "webhook" || method == "s3" || method == "email" {
+		maskedConfig := make(models.DeliveryConfig)
+		for k, v := range deliveryConfig {
+			// Mask sensitive field names
+			if k == "password" || k == "api_key" || k == "secret" || k == "secret_key" || k == "access_key" {
+				maskedConfig[k] = "***MASKED***"
+			} else {
+				maskedConfig[k] = v
+			}
+		}
+		return maskedConfig
+	}
+	return deliveryConfig
+}
+
 // CreateComplete creates a complete schedule with config, deliveries, and recipients in a single transaction
 func (s *CompleteScheduleService) CreateComplete(req models.CompleteScheduleRequest) (*models.CompleteScheduleResponse, error) {
 	db := config.DB
@@ -177,7 +195,9 @@ func (s *CompleteScheduleService) CreateComplete(req models.CompleteScheduleRequ
 			}
 
 			// Marshal delivery config back to json.RawMessage for response
-			deliveryConfigJSON, _ := json.Marshal(deliveryModel.DeliveryConfig)
+			// Mask sensitive fields (password, api_key, secret)
+			maskedConfig := maskSensitiveFields(deliveryModel.DeliveryConfig, deliveryModel.Method)
+			deliveryConfigJSON, _ := json.Marshal(maskedConfig)
 
 			deliveryResponses = append(deliveryResponses, models.DeliveryResponseNested{
 				ID:                   deliveryModel.ID,
@@ -513,7 +533,8 @@ func (s *CompleteScheduleService) UpdateComplete(scheduleID int, req models.Comp
 				}
 
 				// Marshal delivery config back to json.RawMessage for response
-				deliveryConfigJSON, _ := json.Marshal(deliveryModel.DeliveryConfig)
+				maskedConfig := maskSensitiveFields(deliveryModel.DeliveryConfig, deliveryModel.Method)
+				deliveryConfigJSON, _ := json.Marshal(maskedConfig)
 
 				deliveryResponses = append(deliveryResponses, models.DeliveryResponseNested{
 					ID:                   deliveryModel.ID,
@@ -549,7 +570,8 @@ func (s *CompleteScheduleService) UpdateComplete(scheduleID int, req models.Comp
 				}
 
 				// Marshal delivery config back to json.RawMessage for response
-				deliveryConfigJSON, _ := json.Marshal(delivery.DeliveryConfig)
+				maskedConfig := maskSensitiveFields(delivery.DeliveryConfig, delivery.Method)
+				deliveryConfigJSON, _ := json.Marshal(maskedConfig)
 
 				deliveryResponses = append(deliveryResponses, models.DeliveryResponseNested{
 					ID:                   delivery.ID,
