@@ -380,15 +380,10 @@ func (s *CompleteScheduleService) UpdateComplete(scheduleID int, req models.Comp
 				}
 			}
 
-			// Deactivate deliveries not in request
-			if err := tx.Model(&models.ReportDelivery{}).
-				Where("config_id = ? AND id NOT IN ?", configID, getMapKeys(requestedDeliveryIDs)).
-				Updates(map[string]interface{}{
-					"is_active":  false,
-					"updated_at": now,
-					"updated_by": req.UpdatedBy,
-				}).Error; err != nil {
-				return fmt.Errorf("failed to deactivate removed deliveries: %w", err)
+			// Hard delete deliveries not in request
+			if err := tx.Where("config_id = ? AND id NOT IN ?", configID, getMapKeys(requestedDeliveryIDs)).
+				Delete(&models.ReportDelivery{}).Error; err != nil {
+				return fmt.Errorf("failed to delete removed deliveries: %w", err)
 			}
 
 			// Process each delivery in request
